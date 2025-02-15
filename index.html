@@ -5,60 +5,144 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fun Facts About Dogs</title>
     <style>
-        /* CSS Styles */
+        :root {
+            --bg-color: #f0f4f8;
+            --container-bg: white;
+            --text-color: #333;
+            --button-bg: #007bff;
+            --button-hover: #0056b3;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --container-bg: #2d2d2d;
+            --text-color: #ffffff;
+            --button-bg: #4a9eff;
+            --button-hover: #2e7fd1;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            transition: all 0.3s ease;
+        }
+
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f0f4f8;
+            background-color: var(--bg-color);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
+            color: var(--text-color);
         }
 
         .container {
             text-align: center;
             max-width: 600px;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+            width: 90%;
+            padding: 2rem;
+            background: var(--container-bg);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px var(--shadow-color);
         }
 
         .fact {
             font-size: 1.5em;
             margin: 20px 0;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border: 1px solid var(--shadow-color);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadein 0.5s;
+        }
+
+        @keyframes fadein {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .button {
-            padding: 10px 20px;
+            padding: 12px 24px;
             font-size: 1.2em;
             color: white;
-            background-color: #007bff;
+            background-color: var(--button-bg);
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: transform 0.2s, background-color 0.2s;
+            margin: 10px;
         }
 
         .button:hover {
-            background-color: #0056b3;
+            background-color: var(--button-hover);
+            transform: scale(1.05);
+        }
+
+        .button:active {
+            transform: scale(0.95);
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            background: var(--button-bg);
+            color: white;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #factCounter {
+            font-size: 0.9em;
+            margin-top: 15px;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem;
+                width: 95%;
+            }
+            .fact {
+                font-size: 1.2em;
+                padding: 15px;
+            }
         }
     </style>
 </head>
 <body>
+    <button class="theme-toggle" aria-label="Toggle theme">🌓</button>
     <div class="container">
+        <h1>Dog Facts Generator</h1>
         <div class="fact"></div>
-        <button class="button">Generate Another Fun Fact</button>
+        <div class="controls">
+            <button class="button" id="generateBtn">New Fact</button>
+            <button class="button" id="shareBtn">Share Fact</button>
+        </div>
+        <div id="factCounter">Facts viewed: 0</div>
     </div>
-
     <script>
-        // JavaScript Code
         const facts = [
             "Dogs are descendants of wolves and were domesticated around 15,000 years ago.",
             "Dogs have an extraordinary sense of smell, which is 10,000 to 100,000 times more sensitive than humans.",
@@ -69,33 +153,86 @@
             "The world's oldest known breed is the Saluki, which dates back to ancient Egypt.",
             "Dogs are social animals and thrive on companionship, often forming strong bonds with their human families.",
             "The average dog can run at a speed of 15 to 20 miles per hour.",
-            "Dogs have been used in various roles, including service animals, therapy dogs, and search and rescue dogs."
+            "Dogs have been used in various roles, including service animals, therapy dogs, and search and rescue dogs.",
+            "A dog's nose print is unique, much like a human's fingerprint.",
+            "Dogs can see in color, but their color spectrum is more limited than humans.",
+            "The tallest dog breed is the Great Dane, which can reach heights of up to 32 inches.",
+            "Dogs dream just like humans do, and they may act out their dreams by moving their legs or making sounds.",
+            "The smallest dog breed is the Chihuahua, which typically weighs between 2-6 pounds."
         ];
 
-        let attemptCount = 0;
+        let currentFactIndex = -1;
+        let viewedFacts = 0;
+        const factElement = document.querySelector('.fact');
+        const generateBtn = document.getElementById('generateBtn');
+        const shareBtn = document.getElementById('shareBtn');
+        const factCounter = document.getElementById('factCounter');
+        const themeToggle = document.querySelector('.theme-toggle');
 
-        function displayRandomFact() {
-            const factElement = document.querySelector('.fact');
-            const randomIndex = Math.floor(Math.random() * facts.length);
-            factElement.textContent = facts[randomIndex];
+        function getRandomFact() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * facts.length);
+            } while (newIndex === currentFactIndex);
+            currentFactIndex = newIndex;
+            return facts[currentFactIndex];
         }
 
-        const button = document.querySelector('.button');
-        button.addEventListener('click', () => {
-            attemptCount++;
-            if (attemptCount < 3) {
-                displayRandomFact();
+        function displayNewFact() {
+            factElement.style.opacity = '0';
+            setTimeout(() => {
+                const fact = getRandomFact();
+                factElement.textContent = fact;
+                factElement.style.opacity = '1';
+                viewedFacts++;
+                factCounter.textContent = `Facts viewed: ${viewedFacts}`;
+            }, 300);
+        }
+
+        function shareFact() {
+            const fact = factElement.textContent;
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Fun Dog Fact',
+                    text: fact,
+                    url: window.location.href
+                }).catch(console.error);
             } else {
-                // Move the button randomly within a certain range
-                const randomX = Math.random() * 100 - 50; // Adjust range as needed
-                const randomY = Math.random() * 100 - 50; // Adjust range as needed
-                button.style.transform = `translate(${randomX}px, ${randomY}px)`;
-                attemptCount = 0; // Reset attempt count after moving
+                navigator.clipboard.writeText(fact)
+                    .then(() => {
+                        shareBtn.textContent = 'Copied!';
+                        setTimeout(() => {
+                            shareBtn.textContent = 'Share Fact';
+                        }, 2000);
+                    })
+                    .catch(console.error);
+            }
+        }
+
+        function toggleTheme() {
+            document.body.dataset.theme = 
+                document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', document.body.dataset.theme);
+        }
+
+        // Event Listeners
+        generateBtn.addEventListener('click', displayNewFact);
+        shareBtn.addEventListener('click', shareFact);
+        themeToggle.addEventListener('click', toggleTheme);
+
+        // Initialize
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.body.dataset.theme = savedTheme;
+        }
+        displayNewFact();
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                displayNewFact();
             }
         });
-
-        // Initial fact display
-        displayRandomFact();
     </script>
 </body>
 </html>
