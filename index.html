@@ -4,8 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fun Facts About Dogs</title>
+    <meta property="og:title" content="Dog Facts Generator">
+    <meta property="og:description" content="Discover interesting and fun facts about dogs!">
+    <meta property="og:image" content="/api/placeholder/1200/630">
+    <meta property="og:url" content="https://hirukatennakoon.github.io/dog-facts/">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* Previous styles remain exactly the same */
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
 
         :root {
@@ -208,7 +213,6 @@
             }
         }
 
-        /* Success Animation */
         @keyframes checkmark {
             0% {
                 transform: scale(0);
@@ -242,14 +246,15 @@
                 New Fact
             </button>
             <button class="button" id="shareBtn">
-                <i class="fas fa-share-alt"></i>
-                Share Fact
+                <i class="fas fa-copy"></i>
+                Copy Fact
             </button>
         </div>
         <div id="factCounter"></div>
     </div>
     <script>
         const facts = [
+            // Original facts
             "Dogs are descendants of wolves and were domesticated around 15,000 years ago.",
             "Dogs have an extraordinary sense of smell, which is 10,000 to 100,000 times more sensitive than humans.",
             "The Basenji dog is known as the 'barkless dog' because it makes a unique sound called a 'barroo' instead of barking.",
@@ -264,7 +269,9 @@
             "Dogs can see in color, but their color spectrum is more limited than humans.",
             "The tallest dog breed is the Great Dane, which can reach heights of up to 32 inches.",
             "Dogs dream just like humans do, and they may act out their dreams by moving their legs or making sounds.",
-            "The smallest dog breed is the Chihuahua, which typically weighs between 2-6 pounds."
+            "The smallest dog breed is the Chihuahua, which typically weighs between 2-6 pounds.",
+            
+            // New facts added
             "A dog's whiskers help them navigate in the dark and determine if they can fit through narrow spaces.",
             "Dalmatian puppies are born completely white and develop their spots as they grow older.",
             "Dogs have three eyelids, including one specifically for lubrication and protection.",
@@ -339,7 +346,7 @@
                         icon.className = 'fas fa-check success-animation';
                         shareBtn.style.backgroundColor = '#00b894';
                         setTimeout(() => {
-                            icon.className = 'fas fa-share-alt';
+                            icon.className = 'fas fa-copy';
                             shareBtn.style.backgroundColor = '';
                         }, 2000);
                     })
